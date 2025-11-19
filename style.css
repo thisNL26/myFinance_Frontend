@@ -5,7 +5,7 @@ body, html {
     padding: 0;
     font-family: 'Inter', sans-serif;
     background-color: #050505;
-    background-image: url('/res/bg.webp'); 
+    background-image: url('res/bg.webp'); 
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
