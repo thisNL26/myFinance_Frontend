@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Meta tag para evitar el error 403 de Imgur -->
     <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - MVP</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,18 +17,15 @@
     <div id="loading-screen" class="loading-screen">
         <div class="loader-content">
             <h1 class="loader-title">MyFinance</h1>
-            
-            <!-- Tu SVG -->
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-arrow-clockwise loader-icon" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
                 <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
             </svg>
-
             <p class="loader-text">Cargando...</p>
         </div>
     </div>
 
-    <!-- CONTENIDO PRINCIPAL (oculto detrás de la carga) -->
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="container">
         <h1>My Finance</h1>
         
@@ -36,14 +34,14 @@
             <div class="form-group">
                 <label for="hoja">Cuenta</label>
                 <select id="hoja" name="hoja">
-                    <!-- Se llenará automáticamente -->
+                    <!-- Se llena con JS -->
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="cartera">Cartera</label>
                 <select id="cartera" name="cartera">
-                    <!-- Se llenará automáticamente -->
+                    <!-- Se llena con JS -->
                 </select>
             </div>
 
@@ -69,6 +67,18 @@
             <button type="submit" id="submit-button">Registrar</button>
 
             <p id="status-message"></p>
+
+            <!-- NUEVO: ENLACE A GOOGLE SHEETS -->
+            <div class="sheet-link-container">
+                <a href="https://docs.google.com/spreadsheets/d/1HfUUzHzioRc143H7S6VovGJ8aES1Ap01v-7kb_N1ec4/edit?usp=sharing" target="_blank" class="sheet-link">
+                    <!-- Icono SVG de Tabla/Hoja -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 2h-4v3h4V4zm0 4h-4v3h4V8zm0 4h-4v3h3a1 1 0 0 0 1-1v-2zm-5 3v-3H6v3h4zm-5 0v-3H1v2a1 1 0 0 0 1 1h3zm-4-4h4V8H1v3zm0-4h4V4H1v3zm5-3v3h4V4H6zm4 4H6v3h4V8z"/>
+                    </svg>
+                    Ver Data (Sheets)
+                </a>
+            </div>
+
         </form>
     </div>
 
