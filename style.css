@@ -1,0 +1,139 @@
+/* --- Estilos Base y Fondo --- */
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: #050505;
+    background-image: url('/res/bg.webp'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Evita scroll mientras carga */
+}
+
+/* --- PANTALLA DE CARGA --- */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000; /* Negro puro */
+    z-index: 9999; /* Encima de todo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    transition: opacity 0.8s ease-out, visibility 0.8s, transform ease 2s; /* Efecto desvanecer */
+}
+
+/* Clase para ocultar la pantalla (se agrega con JS) */
+.loading-screen.oculto {
+    opacity: 0;
+    transform: scale(10);
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loader-content {
+    text-align: center;
+}
+
+.loader-title {
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 1.5rem;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.loader-text {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* --- Animación del Icono --- */
+.loader-icon {
+    width: 50px; /* Hice el icono un poco más grande */
+    height: 50px;
+    color: #fff;
+    /* Animación infinita: dura 1.5s total */
+    animation: spin-pause 1.5s ease-in-out infinite;
+}
+
+@keyframes spin-pause {
+    0% {
+        transform: rotate(0deg);
+    }
+    65% {
+        /* Gira completo hasta el 65% del tiempo */
+        transform: rotate(360deg);
+    }
+    100% {
+        /* Del 65% al 100% se queda quieto (pausa) */
+        transform: rotate(360deg);
+    }
+}
+
+/* --- Contenedor Principal (Tu CSS original) --- */
+.container {
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    text-align: center;
+    background: rgba(10, 10, 10, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* --- Resto de estilos originales --- */
+h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    letter-spacing: -2px;
+    margin: 0 0 2rem 0;
+    line-height: 1; 
+    text-transform: uppercase;
+}
+.form-group { margin-bottom: 1.25rem; text-align: left; }
+label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: #a0a0a0; }
+
+input[type="text"], input[type="number"], select {
+    width: 100%; padding: 0.9rem 1rem; font-size: 1rem; color: #ffffff;
+    background: transparent; border: 1px solid #555; border-radius: 8px;
+    box-sizing: border-box; transition: border-color 0.3s, box-shadow 0.3s;
+}
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat; background-position: right 1rem center;
+    background-size: 1em; padding-right: 2.5rem;
+}
+select option { background: #1a1a1a; color: #ffffff; }
+
+input[type="text"]:focus, input[type="number"]:focus, select:focus {
+    outline: none; border-color: #ffffff; box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+button {
+    width: 100%; padding: 1rem; font-size: 1.1rem; font-weight: 700; color: #000000;
+    background-color: #ffffff; border: none; border-radius: 8px; cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+button:hover { background-color: #dcdcdc; }
+button:active { transform: scale(0.98); }
+
+#status-message { margin-top: 1.5rem; font-size: 0.9rem; min-height: 1.2em; }
+.success { color: #4CAF50; }
+.error { color: #F44336; }
