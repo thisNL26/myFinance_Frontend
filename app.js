@@ -1,6 +1,5 @@
 // --- URLs del Script ---
 const URL_CONECTION = "https://script.google.com/macros/s/AKfycbxJ2Ce-RodJaJPL2xinczMCZGXtj0zzwfOxwhvr0BCZZTtXNFDt26lIUGBd9hdhS-M/exec";
-
 const GET_CARTERAS_URL = URL_CONECTION + "?accion=getWalletsStructured";
 const GET_RULES_URL = URL_CONECTION + "?accion=getAutomationRules";
 const GET_SUMMARY_URL = URL_CONECTION + "?accion=getAccountSummaryData"; 
@@ -17,11 +16,27 @@ const conceptoInput = document.getElementById('concepto');
 const listaConceptos = document.getElementById('lista-conceptos'); 
 const cantidadInput = document.getElementById('cantidad'); 
 
+// Menú Lateral
+const menuBtn = document.getElementById('menu-btn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+
 let datosGlobales = {};       
 let reglasAutomatizacion = {}; 
 
 // --- INICIO ---
-document.addEventListener('DOMContentLoaded', cargarDatosIniciales);
+document.addEventListener('DOMContentLoaded', () => {
+    cargarDatosIniciales();
+    
+    // Listeners del Menú
+    menuBtn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+});
+
+function toggleMenu() {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+}
 
 async function cargarDatosIniciales() {
     try {
@@ -52,34 +67,33 @@ async function cargarDatosIniciales() {
 
     } catch (error) {
         console.error('Error inicial:', error);
-        const loaderText = document.querySelector('.loader-text');
-        if(loaderText) {
-            loaderText.textContent = "Error: Verifica la URL del Script";
-            loaderText.style.color = "red";
-        }
     }
 }
 
 // --- NAVEGACIÓN ---
 window.cambiarVista = function(vistaNombre) {
+    // 1. Cambiar vista
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    
     const view = document.getElementById(`view-${vistaNombre}`);
     if(view) view.classList.add('active');
     
-    const botones = document.querySelectorAll('.nav-btn');
-    if(botones.length > 0) {
-        if(vistaNombre === 'registro') botones[0].classList.add('active');
-        else botones[1].classList.add('active');
-    }
+    // 2. Actualizar botones del menú
+    document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+    // Identificar botón por texto o índice (aquí usamos índice simple)
+    const botones = document.querySelectorAll('.sidebar-link');
+    if(vistaNombre === 'registro') botones[0].classList.add('active');
+    else botones[1].classList.add('active');
 
+    // 3. Cargar gráfico si es necesario
     if (vistaNombre === 'resumen') {
         cargarResumen();
     }
+
+    // 4. Cerrar menú automáticamente
+    toggleMenu();
 }
 
-// --- FUNCIONES FORMULARIO ---
+// --- FUNCIONES FORMULARIO (Sin Cambios) ---
 function actualizarSelectCarteras() {
     const cuentaSeleccionada = hojaSelect.value;
     const listaCarteras = datosGlobales[cuentaSeleccionada] || [];
@@ -175,7 +189,7 @@ form.addEventListener('submit', event => {
     });
 });
 
-// --- VISUALIZACIÓN D3 (RESUMEN) ---
+// --- VISUALIZACIÓN D3 ---
 
 window.cargarResumen = async function() {
     const container = document.getElementById('d3-container');
@@ -183,8 +197,6 @@ window.cargarResumen = async function() {
 
     try {
         const response = await fetch(GET_SUMMARY_URL);
-        console.log("Response Status:", response.status);
-        
         if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
         const rawData = await response.json(); 
         if (!Array.isArray(rawData)) throw new Error("El backend no devolvió una lista válida.");
@@ -216,63 +228,49 @@ function procesarDatosParaD3(rawData) {
     }
 
     // --- CONFIGURACIÓN DE POSICIONES ---
-    const CENTER_X = 380; // Eje central del diagrama
+    const CENTER_X = 380; 
     
-    // 1. IZQUIERDA: Entradas Generales
-    addNode("Total Entradas", "TOTAL ENTRADAS", 4, 80, 275); // Justo en medio verticalmente (550/2)
+    // 1. IZQUIERDA
+    addNode("Total Entradas", "TOTAL ENTRADAS", 4, 80, 275); 
 
-    // 2. CENTRO: BLOQUE DIGITAL (Despliega hacia abajo desde BBVA)
-    addNode("BBVA", "BBVA", 3, CENTER_X, 60); // Cabeza
-    // Ramificaciones
+    // 2. CENTRO ARRIBA (DIGITAL)
+    addNode("BBVA", "BBVA", 3, CENTER_X, 60); 
     addNode("NU", "NU", 3, CENTER_X - 100, 140); 
     addNode("Open Bank", "Open Bank", 3, CENTER_X, 140); 
     addNode("Mercado Pago", "Mercado Pago", 3, CENTER_X + 100, 140); 
 
-    // 3. CENTRO: SUMAS (En medio de los dos bloques)
-    // Estos nodos flotan en el centro para separar Digital de Efectivo
+    // 3. CENTRO MEDIO (SUMAS)
     addNode("Total Gastos", "Total Gastos", "middle-sum", CENTER_X - 120, 275);
     addNode("Total Gustos", "Total Gustos", "middle-sum", CENTER_X, 275);
     addNode("Total Inversiones", "Total Inversiones", "middle-sum", CENTER_X + 120, 275);
 
-    // 4. CENTRO: BLOQUE EFECTIVO (Despliega hacia arriba desde Entradas Efectivo)
-    // Ramificaciones (inversas a digital)
+    // 4. CENTRO ABAJO (EFECTIVO)
     addNode("Gastos Efectivo", "Gastos Efectivo", 3, CENTER_X - 100, 410);
     addNode("Gustos Efectivo", "Gustos Efectivo", 3, CENTER_X, 410);
     addNode("Inversiones Efectivo", "Inversiones Efectivo", 3, CENTER_X + 100, 410);
-    // Base
     addNode("Entradas Efectivo", "Entradas Efectivo", 3, CENTER_X, 490);
 
-    // 5. DERECHA: TOTALES
-    // Alineados visualmente con el centro de masa de sus bloques
+    // 5. DERECHA (TOTALES)
     addNode("Total Digital", "TOTAL DIGITAL", "total-digital", 650, 140);  
     addNode("Total Efectivo", "TOTAL EFECTIVO", "total-efectivo", 650, 410); 
-    addNode("Capital Total", "CAPITAL TOTAL", 1, 850, 275); // Centro absoluto a la derecha
-
+    addNode("Capital Total", "CAPITAL TOTAL", 1, 850, 275); 
 
     // --- CONEXIONES ---
-    
-    // Entradas Globales -> Cabezas de los bloques
-    // 'entrada-path' usará la lógica ORTOGONAL (Escuadra)
     addLink("Total Entradas", "BBVA", "entrada-path");
     addLink("Total Entradas", "Entradas Efectivo", "entrada-path");
 
-    // Bloque Digital (BBVA baja a los 3)
     addLink("BBVA", "NU", "digital");
     addLink("BBVA", "Open Bank", "digital");
     addLink("BBVA", "Mercado Pago", "digital");
 
-    // Bloque Efectivo (Efectivo sube a los 3)
     addLink("Entradas Efectivo", "Gastos Efectivo", "efectivo");
     addLink("Entradas Efectivo", "Gustos Efectivo", "efectivo");
     addLink("Entradas Efectivo", "Inversiones Efectivo", "efectivo");
 
-    // Conexiones visuales a las Sumas Centrales (Opcional, para dar contexto)
     addLink("NU", "Total Gastos", "faint");
     addLink("Gastos Efectivo", "Total Gastos", "faint");
-    
     addLink("Open Bank", "Total Gustos", "faint");
     addLink("Gustos Efectivo", "Total Gustos", "faint");
-
     addLink("Mercado Pago", "Total Inversiones", "faint");
     addLink("Inversiones Efectivo", "Total Inversiones", "faint");
 
@@ -290,15 +288,13 @@ function renderizarGrafico(data) {
         .attr("viewBox", [0, 0, 850, 550]); 
 
     const defs = svg.append("defs");
-    
-    // Gradientes para líneas
     const gradDig = defs.append("linearGradient").attr("id", "grad-digital").attr("gradientUnits", "userSpaceOnUse")
-        .attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%"); // Vertical
+        .attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%");
     gradDig.append("stop").attr("offset", "0%").attr("stop-color", "#3498db");
     gradDig.append("stop").attr("offset", "100%").attr("stop-color", "#8e44ad");
 
     const gradEfec = defs.append("linearGradient").attr("id", "grad-efectivo").attr("gradientUnits", "userSpaceOnUse")
-        .attr("x1", "0%").attr("y1", "100%").attr("x2", "0%").attr("y2", "0%"); // Vertical Inverso
+        .attr("x1", "0%").attr("y1", "100%").attr("x2", "0%").attr("y2", "0%");
     gradEfec.append("stop").attr("offset", "0%").attr("stop-color", "#2ecc71");
     gradEfec.append("stop").attr("offset", "100%").attr("stop-color", "#f1c40f");
 
@@ -307,13 +303,12 @@ function renderizarGrafico(data) {
     svg.call(zoom);
     svg.call(zoom.transform, d3.zoomIdentity.translate(20, 10).scale(0.95));
 
-    // DIBUJAR LINKS
     g.selectAll(".link")
         .data(data.links)
         .join("path")
         .attr("class", "link")
         .attr("fill", "none")
-        .attr("stroke-linejoin", "round") // Para que las esquinas de la escuadra se vean bien
+        .attr("stroke-linejoin", "round")
         .attr("stroke-width", d => d.colorGroup === "faint" ? 0.5 : 1.5)
         .attr("stroke", d => {
             if (d.colorGroup === "digital") return "url(#grad-digital)";
@@ -326,62 +321,43 @@ function renderizarGrafico(data) {
             const s = data.nodes.find(n => n.id === d.source);
             const t = data.nodes.find(n => n.id === d.target);
             if(!s || !t) return "";
-
-            // --- AQUÍ ESTÁ EL CAMBIO ---
             if (d.colorGroup === "entrada-path") {
-                const padding = 40; // Espacio a la derecha antes de doblar
+                const padding = 40; 
                 const midX = s.fx + padding;
-                // Lógica de Escuadra: Horizontal -> Vertical -> Horizontal
                 return `M${s.fx},${s.fy} L${midX},${s.fy} L${midX},${t.fy} L${t.fx},${t.fy}`;
             }
-            
-            // Para el resto, línea directa (diagonal)
             return `M${s.fx},${s.fy} L${t.fx},${t.fy}`; 
         });
 
-    // DIBUJAR NODOS
     const node = g.selectAll(".node")
         .data(data.nodes)
         .join("g")
         .attr("class", "node")
         .attr("transform", d => `translate(${d.fx},${d.fy})`);
 
-    // Círculos (Solo nodos normales)
     node.each(function(d) {
         const isTotal = d.group === "total-digital" || d.group === "total-efectivo" || d.group === 1;
         const isSum = d.group === "middle-sum";
-        
         if (!isTotal) {
             d3.select(this).append("circle")
                 .attr("r", isSum ? 2.5 : 3.5)
                 .attr("fill", isSum ? "#888" : "#fff");
         }
-        
-        // Líneas Verticales Decorativas para Totales
         if (isTotal) {
             let height = 0;
             let color = "#fff";
-            
-            if (d.group === "total-digital") { height = 80; color = "#3498db"; } // Altura bloque digital
-            if (d.group === "total-efectivo") { height = 80; color = "#2ecc71"; } // Altura bloque efectivo
-            if (d.group === 1) { height = 200; color = "#fff"; } // Capital total (muy alto)
-
-            // Línea a la izquierda del texto
+            if (d.group === "total-digital") { height = 80; color = "#3498db"; }
+            if (d.group === "total-efectivo") { height = 80; color = "#2ecc71"; }
+            if (d.group === 1) { height = 200; color = "#fff"; }
             d3.select(this).append("line")
-                .attr("x1", -20).attr("y1", -height)
-                .attr("x2", -20).attr("y2", height)
-                .attr("stroke", color)
-                .attr("stroke-width", d.group === 1 ? 3 : 1.5) // Más gruesa para capital
-                .attr("opacity", 0.8);
+                .attr("x1", -20).attr("y1", -height).attr("x2", -20).attr("y2", height)
+                .attr("stroke", color).attr("stroke-width", d.group === 1 ? 3 : 1.5).attr("opacity", 0.8);
         }
     });
 
-    // Etiquetas
-    node.append("text")
-        .attr("class", "label")
+    node.append("text").attr("class", "label")
         .attr("x", d => (d.group === "total-digital" || d.group === "total-efectivo" || d.group === 1) ? 0 : 10)
-        .attr("y", -8)
-        .text(d => d.label)
+        .attr("y", -8).text(d => d.label)
         .attr("font-size", d => d.group === 1 ? "24px" : (typeof d.group === 'string' && d.group.includes('total')) ? "16px" : "10px")
         .attr("fill", d => {
             if (d.group === "total-digital") return "#3498db";
@@ -390,18 +366,15 @@ function renderizarGrafico(data) {
             if (d.group === "middle-sum") return "#888";
             return "#aaa";
         })
-        .attr("text-anchor", d => (d.group === "total-digital" || d.group === "total-efectivo" || d.group === 1) ? "start" : "start")
-        .style("text-transform", "uppercase");
+        .attr("text-anchor", "start").style("text-transform", "uppercase");
 
-    // Valores
     const formatter = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 });
-    node.append("text")
-        .attr("class", "value")
+    node.append("text").attr("class", "value")
         .attr("x", d => (d.group === "total-digital" || d.group === "total-efectivo" || d.group === 1) ? 0 : 10)
         .attr("y", d => d.group === 1 ? 35 : (typeof d.group === 'string' && d.group.includes('total')) ? 18 : 8)
         .text(d => formatter.format(d.value))
         .attr("font-size", d => d.group === 1 ? "28px" : (typeof d.group === 'string' && d.group.includes('total')) ? "20px" : (d.group === "middle-sum" ? "11px" : "12px"))
         .attr("font-weight", d => (d.group === 1 || (typeof d.group === 'string' && d.group.includes('total'))) ? "900" : "700")
         .attr("fill", d => (d.group === "total-digital") ? "#3498db" : (d.group === "total-efectivo") ? "#2ecc71" : "#fff")
-        .attr("text-anchor", d => (d.group === "total-digital" || d.group === "total-efectivo" || d.group === 1) ? "start" : "start");
+        .attr("text-anchor", "start");
 }
